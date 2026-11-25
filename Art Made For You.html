@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art Made For You</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: sticky shop header, hero with product collage, filterable product grid, side cart, account page, and a separate admin portal with sidebar. Ink and tangerine with six pop colours for product tiles. */
+:root {
+  --bg: #f5f4fb; --surface: #ffffff; --surface-2: #eceaf6; --ink: #1b1a2e; --muted: #5f5d78; --line: #dad8ea;
+  --accent: #ff6b1a; --accent-ink: #1b1a2e; --good: #11704a; --warn: #8a5a00; --bad: #b3261e;
+  --pop0: #ff9a52; --pop1: #3dd6a3; --pop2: #ffd23f; --pop3: #62b6ff; --pop4: #ff7eb6; --pop5: #a99bff;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12111c; --surface: #1c1b2c; --surface-2: #26253a; --ink: #f3f2ff; --muted: #a9a7c4; --line: #2f2e47;
+    --accent: #ff8a45; --accent-ink: #1b1a2e; --good: #62d9a2; --warn: #f1c35f; --bad: #ff9088;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12111c; --surface: #1c1b2c; --surface-2: #26253a; --ink: #f3f2ff; --muted: #a9a7c4; --line: #2f2e47;
+  --accent: #ff8a45; --accent-ink: #1b1a2e; --good: #62d9a2; --warn: #f1c35f; --bad: #ff9088;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font-body); margin: 0; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1160px; margin: 0 auto; }
+.muted { color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* buttons and fields */
+.btn { border: 2px solid var(--ink); background: var(--surface); border-radius: 999px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.dark { background: var(--ink); color: var(--bg); }
+.btn.small { padding: 5px 12px; font-size: 0.85rem; border-width: 1.5px; }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.link { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; color: inherit; }
+label.f { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 500; color: var(--muted); min-width: 0; }
+input.in, select.in, textarea.in { font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; width: 100%; min-width: 0; }
+input.in:focus, select.in:focus, textarea.in:focus { border-color: var(--accent); }
+textarea.in { min-height: 90px; resize: vertical; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* product art */
+.tile { --f: var(--pop0); --g: var(--pop3); background: color-mix(in srgb, var(--f) 26%, var(--surface)); display: grid; place-items: center; aspect-ratio: 1 / 1; position: relative; }
+.tile svg { width: 72%; height: 72%; }
+.badge { position: absolute; top: 10px; left: 10px; background: var(--ink); color: var(--bg); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.badge.soon { background: var(--surface); color: var(--ink); border: 1.5px solid var(--ink); }
+
+/* shop header */
+.top { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1.5px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 14px; padding-block: 10px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; cursor: pointer; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; }
+.brand svg { width: 38px; height: 38px; }
+.search { flex: 1 1 200px; max-width: 360px; margin-left: auto; }
+.nav { display: flex; gap: 6px; align-items: center; }
+.nav button { background: none; border: 0; font-weight: 700; padding: 8px 12px; border-radius: 999px; cursor: pointer; }
+.nav button:hover, .nav button[aria-current="page"] { background: var(--surface-2); }
+.cartbtn { display: inline-flex; gap: 8px; align-items: center; }
+.cartbtn b { background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 22px; height: 22px; display: inline-grid; place-items: center; font-size: 0.8rem; padding: 0 6px; }
+
+.nav button.admbtn { border: 1.5px dashed var(--ink); font-weight: 700; }
+.nav button.admbtn small { font-weight: 500; color: var(--muted); }
+/* hero */
+.hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items: center; padding-block: 36px 28px; }
+.hero h1 { font-size: clamp(2.2rem, 5.4vw, 4rem); font-weight: 800; }
+.hero h1 em { font-style: normal; background: linear-gradient(transparent 62%, var(--pop2) 62% 92%, transparent 92%); }
+.hero p { font-size: 1.1rem; max-width: 46ch; color: var(--muted); margin: 14px 0 22px; }
+.collage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: end; }
+.collage .tile { border: 2px solid var(--ink); border-radius: 22px; }
+.collage .tile:nth-child(1) { rotate: -4deg; } .collage .tile:nth-child(2) { translate: 0 -14px; rotate: 2deg; } .collage .tile:nth-child(3) { rotate: 5deg; }
+.perks { display: flex; gap: 8px 22px; flex-wrap: wrap; font-size: 0.92rem; font-weight: 500; padding-bottom: 8px; }
+.perks span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
+
+/* catalog */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; padding-block: 18px 6px; }
+.chip { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-weight: 500; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; padding-block: 14px 48px; }
+.card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.card .tile { cursor: pointer; border: 0; width: 100%; padding: 0; }
+.card .info { padding: 14px 16px 16px; display: grid; gap: 4px; flex: 1; align-content: start; }
+.card h3 { font-size: 1.1rem; }
+.card .cat { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.card .buy { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; }
+.price { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.empty { padding: 48px 16px; text-align: center; color: var(--muted); }
+
+/* overlays */
+.scrim { position: fixed; inset: 0; background: rgba(15, 14, 30, .55); z-index: 50; display: grid; place-items: center; padding: 16px; }
+.scrim.right { place-items: stretch end; padding: 0; }
+.modal { background: var(--surface); border: 2px solid var(--ink); border-radius: 24px; width: min(760px, 100%); max-height: calc(100% - 8px); overflow: auto; }
+.modal.narrow { width: min(480px, 100%); }
+.modal .pad { padding: 22px; display: grid; gap: 14px; }
+.pdetail { display: grid; grid-template-columns: 1fr 1fr; }
+.pdetail .tile { border-radius: 22px 0 0 22px; min-height: 260px; aspect-ratio: auto; }
+.drawer { background: var(--surface); width: min(420px, 100%); height: 100%; display: flex; flex-direction: column; border-left: 2px solid var(--ink); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer header { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1.5px solid var(--line); }
+.drawer .lines { flex: 1; overflow: auto; padding: 8px 18px; }
+.line { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.line .tile { width: 56px; border-radius: 12px; aspect-ratio: 1; }
+.line .tile svg { width: 80%; height: 80%; }
+.qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 999px; }
+.qty button { background: none; border: 0; width: 30px; height: 30px; cursor: pointer; font-weight: 700; border-radius: 50%; }
+.qty button:hover { background: var(--surface-2); }
+.qty span { min-width: 24px; text-align: center; font-variant-numeric: tabular-nums; }
+.totals { padding: 16px 18px; border-top: 1.5px solid var(--line); display: grid; gap: 6px; }
+.totals div { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.totals .grand { font-weight: 700; font-size: 1.15rem; }
+.toast { position: fixed; left: 50%; translate: -50% 0; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 90; background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 500; max-width: calc(100% - 32px); }
+
+/* account */
+.page { padding-block: 32px 56px; display: grid; gap: 22px; }
+.page h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.panel { background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 22px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font-size: 1.25rem; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+.authbox { max-width: 460px; margin: 0 auto; width: 100%; }
+.tabs2 { display: flex; gap: 6px; }
+.tabs2 button { flex: 1; border: 1.5px solid var(--line); background: var(--surface); padding: 8px; border-radius: 999px; font-weight: 700; cursor: pointer; }
+.tabs2 button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.hint { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; display: grid; gap: 6px; }
+.err { color: var(--bad); font-size: 0.9rem; min-height: 1.3em; margin: 0; }
+.orderrow { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.orderrow:last-child { border-bottom: 0; }
+.pill { display: inline-block; border-radius: 999px; padding: 2px 11px; font-size: 0.8rem; font-weight: 700; border: 1.5px solid currentColor; }
+.pill.s-New { color: var(--warn); } .pill.s-Packed { color: var(--muted); } .pill.s-Shipped { color: var(--accent); } .pill.s-Delivered { color: var(--good); }
+.pill.s-active { color: var(--good); } .pill.s-soon { color: var(--muted); } .pill.s-hidden { color: var(--bad); }
+footer.foot { border-top: 1.5px solid var(--line); padding-block: 22px 32px; font-size: 0.9rem; color: var(--muted); }
+footer.foot .wrap { display: flex; gap: 10px 24px; flex-wrap: wrap; justify-content: space-between; }
+
+/* admin */
+.adm { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+.side { background: var(--ink); color: var(--bg); padding: 20px 14px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; height: 100vh; }
+.side .brand { color: var(--bg); padding: 4px 8px 16px; font-size: 1.15rem; }
+.side .tag { font: 700 0.7rem var(--font-body); text-transform: uppercase; letter-spacing: .12em; background: var(--accent); color: var(--accent-ink); padding: 2px 8px; border-radius: 999px; margin-left: auto; }
+.side button.nv { background: none; border: 0; color: inherit; text-align: left; padding: 10px 12px; border-radius: 12px; font-weight: 500; cursor: pointer; opacity: .85; }
+.side button.nv:hover { background: rgba(255,255,255,.1); opacity: 1; }
+.side button.nv[aria-current="page"] { background: var(--accent); color: var(--accent-ink); opacity: 1; font-weight: 700; }
+.side .grow { flex: 1; }
+.side .btn { border-color: var(--bg); background: transparent; color: var(--bg); }
+.side .btn:hover { background: rgba(255,255,255,.12); }
+:root[data-theme="dark"] .side, :root:not([data-theme="light"]) .side { }
+.amain { padding: 28px max(20px, env(safe-area-inset-right, 0px)) 56px 28px; display: grid; gap: 20px; align-content: start; min-width: 0; }
+.amain h1 { font-size: 1.9rem; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.kpi { background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 16px 18px; display: grid; gap: 2px; }
+.kpi span { color: var(--muted); font-size: 0.85rem; }
+.kpi b { font: 800 1.9rem/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.kpi.hot { background: var(--accent); border-color: var(--accent-ink); color: var(--accent-ink); }
+.kpi.hot span { color: var(--accent-ink); }
+.tbox { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table .in { padding: 6px 8px; }
+table input.in[type="number"] { width: 92px; text-align: right; }
+.mini { display: flex; gap: 10px; align-items: center; }
+.mini .tile { width: 40px; border-radius: 10px; aspect-ratio: 1; flex: none; }
+.mini .tile svg { width: 84%; height: 84%; }
+.bars { display: grid; gap: 8px; }
+.barrow { display: grid; grid-template-columns: 140px 1fr 70px; gap: 10px; align-items: center; font-size: 0.9rem; }
+.barrow .tr { background: var(--surface-2); border-radius: 999px; height: 12px; overflow: hidden; }
+.barrow .fl { height: 100%; background: var(--accent); border-radius: 999px; }
+.barrow span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font: 500 11px var(--font-body); }
+.chart .val { fill: var(--ink); font-weight: 700; }
+.chart rect.b { fill: var(--accent); }
+.chart line { stroke: var(--line); }
+.formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.formgrid .wide { grid-column: 1 / -1; }
+.swatches { display: flex; gap: 8px; }
+.swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; }
+.swatches button[aria-pressed="true"] { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; }
+  .pdetail { grid-template-columns: 1fr; }
+  .pdetail .tile { border-radius: 22px 22px 0 0; min-height: 0; aspect-ratio: 16 / 10; }
+  .adm { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px 12px; }
+  .side .brand { padding: 0 8px 0 0; }
+  .side .grow { display: none; }
+  .amain { padding: 20px 16px 48px; }
+  .barrow { grid-template-columns: 100px 1fr 60px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card { transition: translate .15s, box-shadow .15s; } .card:hover { translate: 0 -3px; box-shadow: 0 8px 0 var(--ink); }
+  .btn { transition: background .15s; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function () {
+  var KEY = "scribblebay-demo-v1";
+  var CATS = ["Home & Table", "Wear", "Paper", "Art", "Gadgets"];
+  var STAT = ["New", "Packed", "Shipped", "Delivered"];
+  var FREE_FROM = 40, SHIP = 3.9;
+  var app = document.getElementById("app"), ov = document.getElementById("ov"), toastEl = document.getElementById("toast");
+
+  /* ---------- helpers ---------- */
+  function h(tag, p) {
+    var e = document.createElement(tag); p = p || {};
+    for (var k in p) {
+      var v = p[k];
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k === "text") e.textContent = v;
+      else if (k === "value") e.value = v;
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (var i = 2; i < arguments.length; i++) add(e, arguments[i]);
+    return e;
+  }
+  function add(e, c) {
+    if (c == null || c === false) return;
+    if (Array.isArray(c)) c.forEach(function (x) { add(e, x); });
+    else e.append(c.nodeType ? c : document.createTextNode(c));
+  }
+  var eur = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
+  function money(n) { return eur.format(n || 0); }
+  var dfmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  var dshort = new Intl.DateTimeFormat("en-GB", { weekday: "short" });
+  function hash(s) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < s.length; i++) { ch = s.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function pw(email, p) { return hash("sb:" + String(email).toLowerCase() + ":" + p); }
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(function () { toastEl.hidden = true; }, 2600);
+  }
+  function lc(s) { return String(s == null ? "" : s).toLowerCase(); }
+
+  /* ---------- product art ---------- */
+  var P = 'stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+  var ART = {
+    mug: '<path d="M34 38h46v44a10 10 0 0 1-10 10H44a10 10 0 0 1-10-10z" fill="var(--f)" ' + P + '/><path d="M80 48h7a10 10 0 0 1 0 22h-7" fill="none" ' + P + '/><path d="M42 62q6-9 12 0t12 0" fill="none" stroke="var(--g)" stroke-width="5" stroke-linecap="round"/><path d="M48 24q-5 6 0 10M60 22q-5 6 0 10M72 24q-5 6 0 10" fill="none" ' + P + '/>',
+    tshirt: '<path d="M42 28L22 42l10 18 10-6v40h38V54l10 6 10-18-20-14Q61 44 42 28z" fill="var(--f)" ' + P + '/><circle cx="61" cy="70" r="10" fill="var(--g)" ' + P + '/>',
+    bookmark: '<path d="M44 16h32v90l-16-14-16 14z" fill="var(--f)" ' + P + '/><circle cx="60" cy="30" r="5" fill="#fff" ' + P + '/><path d="M60 78c-12-9-12-19-5-19 3 0 5 2 5 5 0-3 2-5 5-5 7 0 7 10-5 19z" fill="var(--g)" ' + P + '/>',
+    card: '<g transform="rotate(8 60 60)"><rect x="26" y="34" width="68" height="56" rx="5" fill="var(--g)" ' + P + '/></g><rect x="28" y="28" width="64" height="64" rx="5" fill="var(--f)" ' + P + '/><polygon points="60,42 65,54 78,55 68,63 71,76 60,69 49,76 52,63 42,55 55,54" fill="#fff" ' + P + '/>',
+    portrait: '<rect x="26" y="18" width="68" height="84" rx="4" fill="#fff" ' + P + '/><rect x="34" y="26" width="52" height="68" fill="var(--f)" ' + P + '/><circle cx="60" cy="54" r="12" fill="#fff" ' + P + '/><path d="M34 94c2-16 12-24 26-24s24 8 26 24z" fill="var(--g)" ' + P + '/>',
+    print: '<rect x="26" y="18" width="68" height="84" rx="4" fill="#fff" ' + P + '/><rect x="34" y="26" width="52" height="68" fill="var(--f)" ' + P + '/><circle cx="70" cy="44" r="7" fill="#fff" ' + P + '/><path d="M34 94V76l16-20 14 16 8-8 14 14v16z" fill="var(--g)" ' + P + '/>',
+    limited: '<rect x="22" y="16" width="68" height="84" rx="4" fill="#fff" ' + P + '/><rect x="30" y="24" width="52" height="68" fill="var(--f)" ' + P + '/><circle cx="66" cy="42" r="7" fill="#fff" ' + P + '/><path d="M30 92V74l16-20 14 16 8-8 14 14v16z" fill="var(--g)" ' + P + '/><circle cx="88" cy="90" r="17" fill="#ffd23f" ' + P + '/><text x="88" y="94" text-anchor="middle" font-size="11" font-weight="700" fill="#1b1a2e" font-family="sans-serif">LTD</text>',
+    phonecase: '<rect x="38" y="12" width="44" height="96" rx="12" fill="var(--f)" ' + P + '/><rect x="45" y="19" width="22" height="24" rx="6" fill="#fff" ' + P + '/><circle cx="52" cy="27" r="3.5" fill="#1b1a2e"/><circle cx="59" cy="36" r="3.5" fill="#1b1a2e"/><path d="M47 84q6-14 13-4t13-8" fill="none" stroke="var(--g)" stroke-width="5" stroke-linecap="round"/>',
+    cap: '<path d="M26 74C26 44 44 32 62 32s32 12 32 42z" fill="var(--f)" ' + P + '/><path d="M62 74c18-4 36-2 44 6-10 8-30 8-44 2z" fill="var(--g)" ' + P + '/><circle cx="62" cy="32" r="4.5" fill="#fff" ' + P + '/><path d="M62 36v36" fill="none" ' + P + '/>',
+    plate: '<circle cx="60" cy="60" r="44" fill="var(--f)" ' + P + '/><circle cx="60" cy="60" r="30" fill="#fff" ' + P + '/><g fill="var(--g)" ' + P + '><circle cx="60" cy="45" r="7"/><circle cx="74" cy="55" r="7"/><circle cx="69" cy="71" r="7"/><circle cx="51" cy="71" r="7"/><circle cx="46" cy="55" r="7"/></g><circle cx="60" cy="60" r="6" fill="#ffd23f" ' + P + '/>',
+    calendar: '<rect x="22" y="26" width="76" height="76" rx="6" fill="#fff" ' + P + '/><path d="M22 32a6 6 0 0 1 6-6h64a6 6 0 0 1 6 6v18H22z" fill="var(--f)" ' + P + '/><path d="M42 16v16M78 16v16" fill="none" ' + P + ' stroke-width="5"/><g fill="#1b1a2e"><circle cx="38" cy="64" r="2.6"/><circle cx="54" cy="64" r="2.6"/><circle cx="70" cy="64" r="2.6"/><circle cx="86" cy="64" r="2.6"/><circle cx="38" cy="78" r="2.6"/><circle cx="54" cy="78" r="2.6"/><circle cx="86" cy="78" r="2.6"/><circle cx="38" cy="92" r="2.6"/><circle cx="54" cy="92" r="2.6"/><circle cx="70" cy="92" r="2.6"/></g><circle cx="70" cy="78" r="7" fill="var(--g)" ' + P + '/>',
+    rug: '<path d="M32 20v10M44 20v10M56 20v10M68 20v10M80 20v10M92 20v10M32 90v10M44 90v10M56 90v10M68 90v10M80 90v10M92 90v10" fill="none" ' + P + '/><rect x="22" y="30" width="80" height="60" rx="4" fill="var(--f)" ' + P + '/><path d="M62 38l18 22-18 22-18-22z" fill="var(--g)" ' + P + '/><path d="M62 49l8 11-8 11-8-11z" fill="#fff" ' + P + '/>',
+    cube: '<path d="M60 20l34 19-34 19-34-19z" fill="#fff" ' + P + '/><path d="M26 39l34 19v40L26 79z" fill="var(--f)" ' + P + '/><path d="M94 39L60 58v40l34-19z" fill="var(--g)" ' + P + '/><path d="M26 54l34 19 34-19M26 66l34 19 34-19" fill="none" ' + P + ' stroke-width="1.8"/>',
+    wall: '<rect x="12" y="28" width="96" height="64" rx="3" fill="#fff" ' + P + '/><rect x="19" y="35" width="82" height="50" fill="var(--f)" ' + P + '/><path d="M19 68q10-14 21 0t21 0 20 0 20-4v21H19z" fill="var(--g)" ' + P + '/><circle cx="84" cy="49" r="7" fill="#fff" ' + P + '/>',
+    keychain: '<circle cx="60" cy="24" r="13" fill="none" ' + P + ' stroke-width="4"/><path d="M60 37v16" fill="none" ' + P + '/><path d="M44 54h32a6 6 0 0 1 6 6v36a6 6 0 0 1-6 6H44a6 6 0 0 1-6-6V60a6 6 0 0 1 6-6z" fill="var(--f)" ' + P + '/><circle cx="60" cy="67" r="4.5" fill="#fff" ' + P + '/><path d="M48 90q6-10 12 0t12-4" fill="none" stroke="var(--g)" stroke-width="5" stroke-linecap="round"/>'
+  };
+  function art(icon, fill) {
+    var d = document.createElement("div"); d.className = "tile";
+    d.style.setProperty("--f", "var(--pop" + (fill % 6) + ")");
+    d.style.setProperty("--g", "var(--pop" + ((fill + 3) % 6) + ")");
+    d.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true">' + (ART[icon] || ART.print) + "</svg>";
+    return d;
+  }
+  var LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="var(--accent)"/><path d="M8 25c4-11 8-11 10-4s6 6 11-6" fill="none" stroke="#1b1a2e" stroke-width="3.2" stroke-linecap="round"/><path d="M26 31l8-8 3.5 3.5-8 8-4.6 1.1z" fill="#fff" stroke="#1b1a2e" stroke-width="2" stroke-linejoin="round"/></svg>';
+  function logo() { var s = document.createElement("span"); s.innerHTML = LOGO; s.style.display = "inline-flex"; return s.firstChild; }
+
+  /* ---------- data ---------- */
+  function seed() {
+    var rows = [
+      ["Custom Mug", "Home & Table", 14.9, 40, "active", "mug", 0, "Ceramic mug with your own motif. Dishwasher safe, 330 ml."],
+      ["Custom T-Shirt", "Wear", 24.9, 60, "active", "tshirt", 3, "Soft organic cotton shirt printed with a hand-drawn design."],
+      ["Bookmark", "Paper", 4.5, 120, "active", "bookmark", 2, "Original or personalised bookmark on thick card, with a tassel."],
+      ["Greeting Card", "Paper", 3.9, 200, "active", "card", 4, "Folded cards for Christmas, Easter, birthdays and more. Envelope included."],
+      ["Personalised Portrait", "Art", 59, 12, "active", "portrait", 1, "A portrait or pet drawn by hand from your photo. Delivered as an A4 print in a frame."],
+      ["Art Print", "Art", 19.9, 80, "active", "print", 5, "Finished motifs from the studio sketchbook, printed on 250 g paper, A4."],
+      ["Limited Edition Print", "Art", 45, 25, "active", "limited", 2, "Numbered and signed. Only 25 copies of each motif are ever printed."],
+      ["Phone Case", "Gadgets", 22.9, 45, "active", "phonecase", 0, "Slim protective case with a custom design. Fits most popular phone models."],
+      ["Cap", "Wear", 19.9, 35, "active", "cap", 1, "Adjustable cotton cap with a printed or embroidered motif."],
+      ["Plate", "Home & Table", 24.9, 18, "active", "plate", 4, "Decorative ceramic plate, 20 cm. Serve on it or hang it on the wall."],
+      ["Calendar", "Paper", 17.9, 3, "active", "calendar", 3, "A3 wall calendar with twelve original drawings, one for every month."],
+      ["Keychain", "Gadgets", 6.9, 70, "active", "keychain", 5, "Acrylic keychain with a small hand-drawn design on both sides."],
+      ["Rug", "Home & Table", 149, 0, "soon", "rug", 5, "Tufted rug with your own design. Planned for a later collection."],
+      ["3D-Printed Items", "Gadgets", 12.9, 0, "soon", "cube", 1, "Phone cases and small decorations from our own 3D printer. Coming later."],
+      ["Wall Print", "Art", 79, 0, "soon", "wall", 2, "Large artwork printed straight onto your wall with a wall printer. Coming later."]
+    ];
+    var products = rows.map(function (r, i) { return { id: "p" + (i + 1), name: r[0], cat: r[1], price: r[2], stock: r[3], status: r[4], icon: r[5], fill: r[6], desc: r[7] }; });
+    var cust = [["Max Mustermann", "max.mustermann@muster.mu"], ["Paul Kusterman", "paul.kusterman@muster.mu"], ["Lena Hart", "lena.hart@example.com"], ["Jonas Weber", "jonas.weber@example.com"]];
+    var customers = cust.map(function (c, i) { return { id: "c" + (i + 1), name: c[0], email: c[1], pass: pw(c[1], "demo1234"), created: Date.now() - (30 + i * 9) * 864e5 }; });
+    var defs = [[0, 0, [["p1", 2], ["p4", 3]], "New"], [1, 1, [["p2", 1]], "New"], [2, 1, [["p5", 1]], "Packed"], [3, 2, [["p6", 2], ["p3", 2]], "Packed"],
+      [0, 3, [["p8", 1], ["p12", 2]], "Shipped"], [1, 3, [["p11", 1]], "Shipped"], [2, 4, [["p7", 1]], "Delivered"], [3, 5, [["p9", 1], ["p2", 1]], "Delivered"],
+      [0, 5, [["p10", 1]], "Delivered"], [1, 6, [["p4", 5], ["p3", 3]], "Delivered"], [2, 6, [["p1", 1], ["p12", 1]], "Delivered"], [0, 9, [["p6", 1]], "Delivered"]];
+    var orders = defs.map(function (d, i) {
+      var items = d[2].map(function (it) { var p = products[parseInt(it[0].slice(1), 10) - 1]; return { pid: p.id, name: p.name, price: p.price, qty: it[1] }; });
+      var sub = items.reduce(function (a, b) { return a + b.price * b.qty; }, 0), ship = sub >= FREE_FROM ? 0 : SHIP;
+      var c = customers[d[0]];
+      return { id: "SB-" + (1001 + i), cid: c.id, name: c.name, email: c.email, address: "Example street " + (i + 4) + ", 20095 Hamburg", items: items, sub: sub, ship: ship, total: sub + ship, status: d[3], date: Date.now() - d[1] * 864e5 - i * 36e5 };
+    });
+    return { shop: { name: "Art Made For You", tagline: "Hand-drawn designs on everyday things. Mugs, shirts, cards, prints and more." }, products: products, customers: customers, orders: orders, nextOrder: 1001 + orders.length, nextProd: products.length + 1, nextCust: customers.length + 1 };
+  }
+  function load() {
+    try { var s = localStorage.getItem(KEY); if (s) { var o = JSON.parse(s); if (o && o.products && o.customers && o.orders && o.shop) { if (o.shop.name === "Scribblebay") o.shop.name = "Art Made For You"; return o; } } } catch (e) {}
+    return seed();
+  }
+  var S = load();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  var session = null;
+  try { session = JSON.parse(sessionStorage.getItem(KEY + "-s")); } catch (e) {}
+  function setSession(s) { session = s; try { if (s) sessionStorage.setItem(KEY + "-s", JSON.stringify(s)); else sessionStorage.removeItem(KEY + "-s"); } catch (e) {} }
+  function prod(id) { return S.products.filter(function (p) { return p.id === id; })[0]; }
+  function me() { return session && session.role === "customer" ? S.customers.filter(function (c) { return c.id === session.id; })[0] || null : null; }
+  function isAdmin() { return !!session && session.role === "admin"; }
+
+  var UI = { view: "shop", tab: "dashboard", cat: "All", q: "", cart: [], drawer: false, modal: null, qty: 1, auth: "login", authErr: "", afterLogin: null, aErr: "",
+    editing: null, ofilter: "All", resetArm: false, confirmDel: null, placed: null };
+
+  function avail(p) { return p.status === "active" && p.stock > 0; }
+  function cartLines() { return UI.cart.map(function (l) { return { p: prod(l.pid), qty: l.qty }; }).filter(function (l) { return l.p; }); }
+  function cartCount() { return UI.cart.reduce(function (a, b) { return a + b.qty; }, 0); }
+  function cartTotals() {
+    var sub = cartLines().reduce(function (a, l) { return a + l.p.price * l.qty; }, 0);
+    var ship = sub === 0 || sub >= FREE_FROM ? 0 : SHIP;
+    return { sub: sub, ship: ship, total: sub + ship };
+  }
+  function addToCart(pid, qty) {
+    var p = prod(pid); if (!p || !avail(p)) return;
+    var l = UI.cart.filter(function (x) { return x.pid === pid; })[0];
+    var have = l ? l.qty : 0, n = Math.min(p.stock, have + qty);
+    if (n === have) { toast("Only " + p.stock + " in stock."); return; }
+    if (l) l.qty = n; else UI.cart.push({ pid: pid, qty: n });
+    toast("Added to cart: " + p.name);
+  }
+
+  /* ---------- shop ---------- */
+  function topbar() {
+    var u = me();
+    var q = h("input", { class: "in", id: "q", type: "search", placeholder: "Search products", "aria-label": "Search products", value: UI.q, autocomplete: "off" });
+    q.addEventListener("input", function () { UI.q = q.value; if (UI.view !== "shop") { UI.view = "shop"; render(); var n = document.getElementById("q"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); } else fillGrid(); });
+    return h("header", { class: "top gut" }, h("div", { class: "wrap" },
+      h("button", { class: "brand", type: "button", "aria-label": S.shop.name + " home", onclick: function () { go("shop"); } }, logo(), S.shop.name),
+      h("div", { class: "search" }, q),
+      h("nav", { class: "nav", "aria-label": "Main" },
+        h("button", { type: "button", "aria-current": UI.view === "shop" ? "page" : null, text: "Shop", onclick: function () { go("shop"); } }),
+        h("button", { type: "button", "aria-current": UI.view === "account" ? "page" : null, text: u ? "Hi, " + u.name.split(" ")[0] : "Sign in", onclick: function () { go("account"); } }),
+        h("button", { type: "button", class: "cartbtn", "aria-label": "Open cart, " + cartCount() + " items", onclick: function () { UI.drawer = true; renderOverlay(); } }, "Cart", h("b", { text: String(cartCount()) })),
+        h("button", { type: "button", class: "admbtn", title: "Admin area. Only for admins.", onclick: function () { go("admin"); } }, "Admin ", h("small", { text: "(admins only)" })))));
+  }
+  function go(v) { UI.view = v; UI.drawer = false; UI.modal = null; window.scrollTo(0, 0); render(); }
+
+  function shopView() {
+    var vis = S.products.filter(function (p) { return p.status !== "hidden"; });
+    var pick = vis.slice(0, 3);
+    var collage = h("div", { class: "collage", "aria-hidden": "true" }, [vis[1] || pick[0], vis[0], vis[11] || pick[2]].filter(Boolean).map(function (p) { return art(p.icon, p.fill); }));
+    var chips = h("div", { class: "chips", role: "group", "aria-label": "Categories" }, ["All"].concat(CATS).map(function (c) {
+      return h("button", { type: "button", class: "chip", "aria-pressed": UI.cat === c ? "true" : "false", text: c, onclick: function () { UI.cat = c; render(); } });
+    }));
+    return h("div", null,
+      h("section", { class: "gut" }, h("div", { class: "wrap hero" },
+        h("div", null,
+          h("h1", null, "Drawn by hand.", h("br"), h("em", null, "Printed on things"), " you use."),
+          h("p", { text: S.shop.tagline }),
+          h("div", { class: "row" },
+            h("button", { class: "btn primary", type: "button", text: "Shop all products", onclick: function () { var c = document.getElementById("catalog"); if (c) c.scrollIntoView({ behavior: "smooth" }); } }),
+            h("button", { class: "btn", type: "button", text: me() ? "My account" : "Create an account", onclick: function () { UI.auth = "register"; go("account"); } }))),
+        collage)),
+      h("section", { class: "gut" }, h("div", { class: "wrap" }, h("div", { class: "perks" }, h("span", { text: "Made to order in small batches" }), h("span", { text: "Free shipping from " + money(FREE_FROM) }), h("span", { text: "Personalised on request" })))),
+      h("section", { class: "gut", id: "catalog" }, h("div", { class: "wrap" }, chips, h("div", { class: "grid", id: "grid", "aria-live": "polite" }))));
+  }
+  function fillGrid() {
+    var g = document.getElementById("grid"); if (!g) return;
+    g.textContent = "";
+    var t = lc(UI.q).trim();
+    var list = S.products.filter(function (p) {
+      if (p.status === "hidden") return false;
+      if (UI.cat !== "All" && p.cat !== UI.cat) return false;
+      return !t || lc(p.name).indexOf(t) > -1 || lc(p.cat).indexOf(t) > -1 || lc(p.desc).indexOf(t) > -1;
+    });
+    if (!list.length) { g.append(h("div", { class: "empty", style: "grid-column:1/-1", text: "No products match your search." })); return; }
+    list.forEach(function (p) {
+      var tile = art(p.icon, p.fill);
+      var badge = p.status === "soon" ? h("span", { class: "badge soon", text: "Coming soon" }) : p.stock === 0 ? h("span", { class: "badge", text: "Sold out" }) : p.stock <= 5 ? h("span", { class: "badge", text: "Only " + p.stock + " left" }) : p.icon === "limited" ? h("span", { class: "badge", text: "Limited" }) : null;
+      if (badge) tile.append(badge);
+      var open = h("button", { type: "button", class: "tile-btn", "aria-label": "View " + p.name, style: "all:unset;display:block;cursor:pointer", onclick: function () { UI.modal = p.id; UI.qty = 1; renderOverlay(); } }, tile);
+      var btn = avail(p) ? h("button", { class: "btn small primary", type: "button", text: "Add to cart", onclick: function () { addToCart(p.id, 1); render(); } })
+        : h("button", { class: "btn small", type: "button", disabled: true, text: p.status === "soon" ? "Coming soon" : "Sold out" });
+      g.append(h("article", { class: "card" }, open, h("div", { class: "info" }, h("span", { class: "cat", text: p.cat }), h("h3", { text: p.name }), h("div", { class: "buy" }, h("span", { class: "price", text: money(p.price) }), btn))));
+    });
+  }
+
+  /* ---------- overlays ---------- */
+  function renderOverlay() {
+    ov.textContent = "";
+    if (UI.modal) ov.append(productModal());
+    else if (UI.checkout) ov.append(checkoutModal());
+    else if (UI.placed) ov.append(placedModal());
+    else if (UI.drawer) ov.append(cartDrawer());
+  }
+  function closeOv() { UI.modal = null; UI.drawer = false; UI.checkout = false; UI.placed = null; renderOverlay(); }
+  function scrim(child, cls) {
+    var s = h("div", { class: "scrim " + (cls || ""), onclick: function (e) { if (e.target === s) closeOv(); } }, child);
+    return s;
+  }
+  function productModal() {
+    var p = prod(UI.modal); if (!p) { UI.modal = null; return h("div"); }
+    var tile = art(p.icon, p.fill);
+    var buy;
+    if (avail(p)) {
+      var qv = h("span", { text: String(UI.qty) });
+      buy = h("div", { class: "row" },
+        h("div", { class: "qty" }, h("button", { type: "button", "aria-label": "Less", text: "−", onclick: function () { UI.qty = Math.max(1, UI.qty - 1); qv.textContent = UI.qty; } }), qv,
+          h("button", { type: "button", "aria-label": "More", text: "+", onclick: function () { UI.qty = Math.min(p.stock, UI.qty + 1); qv.textContent = UI.qty; } })),
+        h("button", { class: "btn primary", type: "button", text: "Add to cart", onclick: function () { addToCart(p.id, UI.qty); UI.modal = null; UI.drawer = true; render(); } }));
+    } else buy = h("p", { class: "muted", text: p.status === "soon" ? "This product is planned for a later collection." : "This product is sold out right now." });
+    return scrim(h("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-label": p.name }, h("div", { class: "pdetail" }, tile,
+      h("div", { class: "pad" }, h("div", { class: "row", style: "justify-content:space-between" }, h("span", { class: "muted", text: p.cat }), h("button", { class: "btn small", type: "button", text: "Close", onclick: closeOv })),
+        h("h2", { text: p.name }), h("span", { class: "price", text: money(p.price) }), h("p", { class: "muted", text: p.desc }),
+        avail(p) ? h("span", { class: "muted", text: p.stock + " in stock" }) : null, buy))));
+  }
+  function cartDrawer() {
+    var lines = cartLines(), t = cartTotals();
+    var body = h("div", { class: "lines" });
+    if (!lines.length) body.append(h("div", { class: "empty" }, h("p", { text: "Your cart is empty." }), h("button", { class: "btn", type: "button", text: "Browse products", onclick: function () { closeOv(); go("shop"); } })));
+    lines.forEach(function (l) {
+      var tile = art(l.p.icon, l.p.fill);
+      body.append(h("div", { class: "line" }, tile,
+        h("div", null, h("strong", { text: l.p.name }), h("div", { class: "muted", text: money(l.p.price) }),
+          h("div", { class: "qty", style: "margin-top:6px" },
+            h("button", { type: "button", "aria-label": "Less " + l.p.name, text: "−", onclick: function () { var x = UI.cart.filter(function (c) { return c.pid === l.p.id; })[0]; x.qty--; if (x.qty <= 0) UI.cart.splice(UI.cart.indexOf(x), 1); render(); } }),
+            h("span", { text: String(l.qty) }),
+            h("button", { type: "button", "aria-label": "More " + l.p.name, text: "+", onclick: function () { addToCart(l.p.id, 1); render(); } }))),
+        h("div", { style: "text-align:right" }, h("strong", { text: money(l.p.price * l.qty) }), h("br"), h("button", { class: "link muted", type: "button", text: "Remove", onclick: function () { UI.cart = UI.cart.filter(function (c) { return c.pid !== l.p.id; }); render(); } }))));
+    });
+    var tot = h("div", { class: "totals" },
+      h("div", null, h("span", { text: "Subtotal" }), h("span", { text: money(t.sub) })),
+      h("div", null, h("span", { text: "Shipping" }), h("span", { text: lines.length ? (t.ship ? money(t.ship) : "Free") : "–" })),
+      lines.length && t.ship ? h("div", { class: "muted", style: "font-size:.85rem" }, h("span", { text: "Add " + money(FREE_FROM - t.sub) + " more for free shipping" }), h("span")) : null,
+      h("div", { class: "grand" }, h("span", { text: "Total" }), h("span", { text: money(t.total) })),
+      h("button", { class: "btn primary", type: "button", disabled: !lines.length, text: "Checkout", onclick: function () {
+        if (!me()) { UI.afterLogin = "checkout"; UI.auth = "login"; UI.drawer = false; toast("Sign in or create an account to check out."); go("account"); return; }
+        UI.drawer = false; UI.checkout = true; renderOverlay();
+      } }));
+    return scrim(h("aside", { class: "drawer", role: "dialog", "aria-modal": "true", "aria-label": "Cart" }, h("header", null, h("h2", { text: "Your cart" }), h("button", { class: "btn small", type: "button", text: "Close", onclick: closeOv })), body, tot), "right");
+  }
+  function checkoutModal() {
+    var u = me(), t = cartTotals(), err = h("p", { class: "err", role: "alert" });
+    var name = h("input", { class: "in", id: "co-name", value: u ? u.name : "", autocomplete: "name" });
+    var addr = h("textarea", { class: "in", id: "co-addr", placeholder: "Street, postcode, city" });
+    var form = h("form", { class: "pad", novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      if (!name.value.trim() || !addr.value.trim()) { err.textContent = "Please enter your name and delivery address."; return; }
+      var items = cartLines().map(function (l) { return { pid: l.p.id, name: l.p.name, price: l.p.price, qty: l.qty }; });
+      for (var i = 0; i < items.length; i++) { var p = prod(items[i].pid); if (!avail(p) || p.stock < items[i].qty) { err.textContent = p.name + " is no longer available in that quantity. Please update your cart."; return; } }
+      items.forEach(function (it) { prod(it.pid).stock -= it.qty; });
+      var tt = cartTotals();
+      var o = { id: "SB-" + S.nextOrder++, cid: u.id, name: name.value.trim(), email: u.email, address: addr.value.trim(), items: items, sub: tt.sub, ship: tt.ship, total: tt.total, status: "New", date: Date.now() };
+      S.orders.unshift(o); save(); UI.cart = []; UI.checkout = false; UI.placed = o; render();
+    } },
+      h("h2", { text: "Checkout" }),
+      h("div", { class: "hint" }, h("strong", { text: "Demo shop" }), h("span", { text: "No payment is taken and nothing is shipped." })),
+      h("label", { class: "f", for: "co-name" }, "Full name", name),
+      h("label", { class: "f", for: "co-addr" }, "Delivery address", addr),
+      h("div", { class: "totals", style: "padding:0;border:0" }, h("div", null, h("span", { text: "Subtotal" }), h("span", { text: money(t.sub) })), h("div", null, h("span", { text: "Shipping" }), h("span", { text: t.ship ? money(t.ship) : "Free" })), h("div", { class: "grand" }, h("span", { text: "Total" }), h("span", { text: money(t.total) }))),
+      err,
+      h("div", { class: "row" }, h("button", { class: "btn primary", type: "submit", text: "Place demo order" }), h("button", { class: "btn", type: "button", text: "Back to cart", onclick: function () { UI.checkout = false; UI.drawer = true; renderOverlay(); } })));
+    return scrim(h("div", { class: "modal narrow", role: "dialog", "aria-modal": "true", "aria-label": "Checkout" }, form));
+  }
+  function placedModal() {
+    var o = UI.placed;
+    return scrim(h("div", { class: "modal narrow", role: "dialog", "aria-modal": "true", "aria-label": "Order placed" }, h("div", { class: "pad" },
+      h("h2", { text: "Thank you, " + o.name.split(" ")[0] + "!" }),
+      h("p", { text: "Order " + o.id + " is placed. Total " + money(o.total) + "." }),
+      h("p", { class: "muted", text: "This is a demo order. You can follow it under My account, and the shop owner sees it in the admin portal." }),
+      h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", text: "View my orders", onclick: function () { UI.placed = null; go("account"); } }), h("button", { class: "btn", type: "button", text: "Keep shopping", onclick: function () { UI.placed = null; go("shop"); } })))));
+  }
+
+  /* ---------- account ---------- */
+  function accountView() {
+    var u = me();
+    return h("div", { class: "gut" }, h("div", { class: "wrap page" }, u ? accountHome(u) : authBox()));
+  }
+  function authBox() {
+    var err = h("p", { class: "err", role: "alert", text: UI.authErr });
+    var reg = UI.auth === "register";
+    var name = reg ? h("input", { class: "in", id: "a-name", autocomplete: "name" }) : null;
+    var email = h("input", { class: "in", id: "a-email", type: "email", autocomplete: "email" });
+    var pass = h("input", { class: "in", id: "a-pass", type: "password", autocomplete: reg ? "new-password" : "current-password" });
+    var form = h("form", { class: "panel", novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      var em = email.value.trim().toLowerCase(), pa = pass.value;
+      if (!em || em.indexOf("@") < 1) { UI.authErr = "Please enter a valid email address."; err.textContent = UI.authErr; return; }
+      if (reg) {
+        if (!name.value.trim()) { err.textContent = "Please enter your name."; return; }
+        if (pa.length < 6) { err.textContent = "Use at least 6 characters for the password."; return; }
+        if (S.customers.some(function (c) { return c.email.toLowerCase() === em; })) { err.textContent = "This email already has an account. Try signing in."; return; }
+        var c = { id: "c" + S.nextCust++, name: name.value.trim(), email: em, pass: pw(em, pa), created: Date.now() };
+        S.customers.push(c); save(); setSession({ role: "customer", id: c.id });
+      } else {
+        var f = S.customers.filter(function (c) { return c.email.toLowerCase() === em && c.pass === pw(em, pa); })[0];
+        if (!f) { err.textContent = "Email or password is wrong."; return; }
+        setSession({ role: "customer", id: f.id });
+      }
+      UI.authErr = "";
+      var next = UI.afterLogin; UI.afterLogin = null;
+      render();
+      if (next === "checkout" && cartCount()) { UI.checkout = true; renderOverlay(); }
+    } },
+      h("div", { class: "tabs2", role: "tablist" },
+        h("button", { type: "button", role: "tab", "aria-selected": reg ? "false" : "true", text: "Sign in", onclick: function () { UI.auth = "login"; UI.authErr = ""; render(); } }),
+        h("button", { type: "button", role: "tab", "aria-selected": reg ? "true" : "false", text: "Create account", onclick: function () { UI.auth = "register"; UI.authErr = ""; render(); } })),
+      reg ? h("label", { class: "f", for: "a-name" }, "Name", name) : null,
+      h("label", { class: "f", for: "a-email" }, "Email", email),
+      h("label", { class: "f", for: "a-pass" }, "Password", pass),
+      err,
+      h("button", { class: "btn primary", type: "submit", text: reg ? "Create account" : "Sign in" }),
+      h("div", { class: "hint" }, h("strong", { text: "Demo account" }), h("span", { text: "max.mustermann@muster.mu / demo1234" }),
+        h("button", { class: "link", type: "button", style: "justify-self:start", text: "Fill in demo login", onclick: function () { UI.auth = "login"; render(); document.getElementById("a-email").value = "max.mustermann@muster.mu"; document.getElementById("a-pass").value = "demo1234"; } })),
+      h("p", { class: "muted", style: "font-size:.82rem;margin:0", text: "Demo only. Please do not use a real password." }));
+    return h("div", { class: "authbox" }, h("h1", { text: "Your account", style: "margin-bottom:16px" }), form);
+  }
+  function accountHome(u) {
+    var mine = S.orders.filter(function (o) { return o.cid === u.id; });
+    var name = h("input", { class: "in", id: "p-name", value: u.name });
+    var em = h("input", { class: "in", id: "p-email", value: u.email, readonly: true });
+    var list = h("div");
+    if (!mine.length) list.append(h("p", { class: "muted", text: "No orders yet. Your first order will show up here." }));
+    mine.forEach(function (o) {
+      list.append(h("div", { class: "orderrow" },
+        h("div", null, h("strong", { text: o.id }), " ", h("span", { class: "muted", text: dfmt.format(o.date) }), h("div", { class: "muted", text: o.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ") })),
+        h("div", { style: "text-align:right" }, h("strong", { text: money(o.total) }), h("br"), h("span", { class: "pill s-" + o.status, text: o.status }))));
+    });
+    return h("div", { class: "page", style: "padding:0" },
+      h("div", { class: "row", style: "justify-content:space-between" }, h("h1", { text: "Hello, " + u.name.split(" ")[0] }), h("button", { class: "btn", type: "button", text: "Sign out", onclick: function () { setSession(null); toast("Signed out."); render(); } })),
+      h("div", { class: "two" },
+        h("section", { class: "panel" }, h("h2", { text: "My orders" }), list),
+        h("section", { class: "panel" }, h("h2", { text: "Profile" }),
+          h("label", { class: "f", for: "p-name" }, "Name", name), h("label", { class: "f", for: "p-email" }, "Email", em),
+          h("button", { class: "btn primary", type: "button", style: "justify-self:start", text: "Save name", onclick: function () { if (!name.value.trim()) return; u.name = name.value.trim(); save(); toast("Saved."); render(); } }))));
+  }
+
+  /* ---------- admin ---------- */
+  function adminLogin() {
+    var err = h("p", { class: "err", role: "alert", text: UI.aErr });
+    var email = h("input", { class: "in", id: "ad-email", type: "email" });
+    var pass = h("input", { class: "in", id: "ad-pass", type: "password" });
+    var form = h("form", { class: "panel authbox", novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      if (["admin@artmadeforyou.example", "admin@scribblebay.example"].indexOf(email.value.trim().toLowerCase()) > -1 && pass.value === "admin123") { UI.aErr = ""; setSession({ role: "admin" }); UI.tab = "dashboard"; render(); }
+      else err.textContent = "Wrong email or password.";
+    } },
+      h("div", { class: "brand", style: "cursor:default" }, logo(), "Admin portal"),
+      h("div", { class: "hint" }, h("strong", { text: "Admin area. Only for admins." }), h("span", { text: "Customers sign in on the Account page." })),
+      h("label", { class: "f", for: "ad-email" }, "Email", email), h("label", { class: "f", for: "ad-pass" }, "Password", pass), err,
+      h("button", { class: "btn primary", type: "submit", text: "Sign in" }),
+      h("div", { class: "hint" }, h("strong", { text: "Demo login" }), h("span", { text: "admin@artmadeforyou.example / admin123" }),
+        h("button", { class: "link", type: "button", style: "justify-self:start", text: "Fill in demo login", onclick: function () { email.value = "admin@artmadeforyou.example"; pass.value = "admin123"; } })),
+      h("button", { class: "link muted", type: "button", style: "justify-self:start", text: "Back to the shop", onclick: function () { go("shop"); } }));
+    return h("div", { class: "gut", style: "min-height:100vh;display:grid;place-items:center;padding-block:32px" }, form);
+  }
+  var ATABS = [["dashboard", "Dashboard"], ["products", "Products"], ["orders", "Orders"], ["customers", "Customers"], ["settings", "Settings"]];
+  function adminView() {
+    if (!isAdmin()) return adminLogin();
+    var side = h("aside", { class: "side" },
+      h("div", { class: "brand", style: "cursor:default" }, logo(), S.shop.name, h("span", { class: "tag", text: "Admin" })),
+      ATABS.map(function (t) { return h("button", { class: "nv", type: "button", "aria-current": UI.tab === t[0] ? "page" : null, text: t[1], onclick: function () { UI.tab = t[0]; UI.editing = null; render(); } }); }),
+      h("div", { class: "grow" }),
+      h("button", { class: "btn small", type: "button", text: "View shop", onclick: function () { go("shop"); } }),
+      h("button", { class: "btn small", type: "button", text: "Sign out", onclick: function () { setSession(null); go("shop"); } }));
+    var body = UI.tab === "products" ? aProducts() : UI.tab === "orders" ? aOrders() : UI.tab === "customers" ? aCustomers() : UI.tab === "settings" ? aSettings() : aDash();
+    return h("div", { class: "adm" }, side, h("main", { class: "amain" }, body));
+  }
+  function sel(opts, val, onchange, label) {
+    var s = h("select", { class: "in", "aria-label": label }, opts.map(function (o) { var v = Array.isArray(o) ? o[0] : o, t = Array.isArray(o) ? o[1] : o; return h("option", { value: v, text: t }); }));
+    s.value = val; s.addEventListener("change", function () { onchange(s.value); }); return s;
+  }
+  function aDash() {
+    var rev = S.orders.reduce(function (a, o) { return a + o.total; }, 0);
+    var open = S.orders.filter(function (o) { return o.status === "New" || o.status === "Packed"; }).length;
+    var low = S.products.filter(function (p) { return p.status === "active" && p.stock <= 5; });
+    // revenue per day, last 7 days
+    var days = [], now = new Date(); now.setHours(0, 0, 0, 0);
+    for (var i = 6; i >= 0; i--) { var d0 = now.getTime() - i * 864e5; days.push({ t: d0, label: dshort.format(d0), v: 0 }); }
+    S.orders.forEach(function (o) { days.forEach(function (d) { if (o.date >= d.t && o.date < d.t + 864e5) d.v += o.total; }); });
+    var max = Math.max.apply(null, days.map(function (d) { return d.v; }).concat([1]));
+    var W = 460, H = 190, bw = 40, gap = (W - 7 * bw) / 8, bars = "";
+    days.forEach(function (d, i2) {
+      var bh = Math.round((d.v / max) * 120), x = gap + i2 * (bw + gap), y = 150 - bh;
+      bars += '<rect class="b" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + Math.max(bh, 2) + '" rx="6"/>' +
+        '<text class="val" x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle">' + (d.v ? Math.round(d.v) : "") + "</text>" +
+        '<text x="' + (x + bw / 2) + '" y="170" text-anchor="middle">' + d.label + "</text>";
+    });
+    var chart = h("div"); chart.innerHTML = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Revenue in euros for the last seven days"><line x1="0" x2="' + W + '" y1="150" y2="150"/>' + bars + "</svg>";
+    var units = {};
+    S.orders.forEach(function (o) { o.items.forEach(function (it) { units[it.name] = (units[it.name] || 0) + it.qty; }); });
+    var top = Object.keys(units).map(function (k) { return [k, units[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+    var tmax = top.length ? top[0][1] : 1;
+    var recent = S.orders.slice(0, 5);
+    return h("div", { style: "display:grid;gap:20px" },
+      h("h1", { text: "Dashboard" }),
+      h("div", { class: "kpis" },
+        h("div", { class: "kpi hot" }, h("span", { text: "Revenue" }), h("b", { text: money(rev) })),
+        h("div", { class: "kpi" }, h("span", { text: "Orders" }), h("b", { text: String(S.orders.length) })),
+        h("div", { class: "kpi" }, h("span", { text: "To ship" }), h("b", { text: String(open) })),
+        h("div", { class: "kpi" }, h("span", { text: "Customers" }), h("b", { text: String(S.customers.length) })),
+        h("div", { class: "kpi" }, h("span", { text: "Low stock" }), h("b", { text: String(low.length) }))),
+      h("div", { class: "two" },
+        h("section", { class: "panel" }, h("h2", { text: "Revenue, last 7 days (€)" }), chart),
+        h("section", { class: "panel" }, h("h2", { text: "Best sellers (units)" }), h("div", { class: "bars" }, top.map(function (r) {
+          return h("div", { class: "barrow" }, h("span", { text: r[0] }), h("div", { class: "tr" }, h("div", { class: "fl", style: "width:" + Math.round(r[1] / tmax * 100) + "%" })), h("span", { text: String(r[1]) }));
+        })))),
+      h("div", { class: "two" },
+        h("section", { class: "panel" }, h("h2", { text: "Latest orders" }), recent.map(function (o) {
+          return h("div", { class: "orderrow" }, h("div", null, h("strong", { text: o.id }), " ", h("span", { class: "muted", text: o.name })), h("div", { style: "text-align:right" }, h("strong", { text: money(o.total) }), " ", h("span", { class: "pill s-" + o.status, text: o.status })));
+        })),
+        h("section", { class: "panel" }, h("h2", { text: "Running low" }), low.length ? low.map(function (p) {
+          return h("div", { class: "orderrow" }, h("div", null, h("strong", { text: p.name })), h("div", null, h("span", { class: "pill s-New", text: p.stock + " left" })));
+        }) : h("p", { class: "muted", text: "Everything is well stocked." }))));
+  }
+  function aProducts() {
+    var ed = UI.editing;
+    var editor = ed ? productEditor(ed) : null;
+    var rows = S.products.map(function (p) {
+      var price = h("input", { class: "in", type: "number", min: "0", step: "0.1", value: String(p.price), "aria-label": "Price of " + p.name });
+      price.addEventListener("change", function () { var v = parseFloat(String(price.value).replace(",", ".")); if (isNaN(v) || v < 0) { price.value = p.price; return; } p.price = Math.round(v * 100) / 100; save(); toast("Price saved."); render(); });
+      var stock = h("input", { class: "in", type: "number", min: "0", step: "1", value: String(p.stock), "aria-label": "Stock of " + p.name });
+      stock.addEventListener("change", function () { var v = parseInt(stock.value, 10); if (isNaN(v) || v < 0) { stock.value = p.stock; return; } p.stock = v; save(); toast("Stock saved."); render(); });
+      return h("tr", null,
+        h("td", null, h("div", { class: "mini" }, art(p.icon, p.fill), h("div", null, h("strong", { text: p.name }), h("div", { class: "muted", style: "font-size:.8rem", text: p.cat })))),
+        h("td", { class: "num" }, price), h("td", { class: "num" }, stock),
+        h("td", null, sel([["active", "Live"], ["soon", "Coming soon"], ["hidden", "Hidden"]], p.status, function (v) { p.status = v; save(); toast("Status saved."); render(); }, "Status of " + p.name)),
+        h("td", null, h("button", { class: "btn small", type: "button", text: "Edit", onclick: function () { UI.editing = p.id; render(); } })));
+    });
+    return h("div", { style: "display:grid;gap:20px" },
+      h("div", { class: "row", style: "justify-content:space-between" }, h("h1", { text: "Products" }), h("button", { class: "btn primary", type: "button", text: "+ New product", onclick: function () { UI.editing = "new"; render(); } })),
+      editor,
+      h("section", { class: "panel" }, h("p", { class: "muted", style: "margin:0", text: "Change price, stock and status right in the table. The shop updates at once." }),
+        h("div", { class: "tbox" }, h("table", null, h("thead", null, h("tr", null, h("th", { text: "Product" }), h("th", { class: "num", text: "Price (€)" }), h("th", { class: "num", text: "Stock" }), h("th", { text: "Status" }), h("th"))), h("tbody", null, rows)))));
+  }
+  function productEditor(id) {
+    var isNew = id === "new";
+    var p = isNew ? { id: null, name: "", cat: CATS[0], price: 9.9, stock: 10, status: "active", icon: "print", fill: 0, desc: "" } : prod(id);
+    if (!p) { UI.editing = null; return null; }
+    var d = { name: p.name, cat: p.cat, price: p.price, stock: p.stock, status: p.status, icon: p.icon, fill: p.fill, desc: p.desc };
+    var err = h("p", { class: "err", role: "alert" });
+    var name = h("input", { class: "in", id: "e-name", value: d.name });
+    var price = h("input", { class: "in", id: "e-price", type: "number", min: "0", step: "0.1", value: String(d.price) });
+    var stock = h("input", { class: "in", id: "e-stock", type: "number", min: "0", step: "1", value: String(d.stock) });
+    var desc = h("textarea", { class: "in", id: "e-desc" }); desc.value = d.desc;
+    var cat = sel(CATS, d.cat, function (v) { d.cat = v; }, "Category");
+    var stat = sel([["active", "Live"], ["soon", "Coming soon"], ["hidden", "Hidden"]], d.status, function (v) { d.status = v; }, "Status");
+    var icon = sel(Object.keys(ART).map(function (k) { return [k, k]; }), d.icon, function (v) { d.icon = v; prev(); }, "Illustration");
+    var prevBox = h("div", { style: "width:90px" });
+    function prev() { prevBox.textContent = ""; prevBox.append(art(d.icon, d.fill)); }
+    var sw = h("div", { class: "swatches", role: "group", "aria-label": "Colour" });
+    function swatches() { sw.textContent = ""; for (var i = 0; i < 6; i++) (function (i) { sw.append(h("button", { type: "button", "aria-label": "Colour " + (i + 1), "aria-pressed": d.fill === i ? "true" : "false", style: "background:var(--pop" + i + ")", onclick: function () { d.fill = i; swatches(); prev(); } })); })(i); }
+    swatches(); prev();
+    var delBtn = !isNew ? h("button", { class: "btn danger", type: "button", text: UI.confirmDel === p.id ? "Click again to delete" : "Delete", onclick: function () {
+      if (UI.confirmDel !== p.id) { UI.confirmDel = p.id; render(); return; }
+      S.products = S.products.filter(function (x) { return x.id !== p.id; }); UI.cart = UI.cart.filter(function (c) { return c.pid !== p.id; }); UI.editing = null; UI.confirmDel = null; save(); toast("Product deleted."); render();
+    } }) : null;
+    return h("form", { class: "panel", novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      var pr = parseFloat(String(price.value).replace(",", ".")), st = parseInt(stock.value, 10);
+      if (!name.value.trim()) { err.textContent = "Please enter a product name."; return; }
+      if (isNaN(pr) || pr < 0) { err.textContent = "Please enter a valid price."; return; }
+      if (isNaN(st) || st < 0) { err.textContent = "Please enter a valid stock number."; return; }
+      var data = { name: name.value.trim(), cat: d.cat, price: Math.round(pr * 100) / 100, stock: st, status: d.status, icon: d.icon, fill: d.fill, desc: desc.value.trim() };
+      if (isNew) { data.id = "p" + S.nextProd++; S.products.push(data); } else Object.assign(p, data);
+      UI.editing = null; UI.confirmDel = null; save(); toast(isNew ? "Product added." : "Product saved."); render();
+    } },
+      h("h2", { text: isNew ? "New product" : "Edit " + p.name }),
+      h("div", { class: "formgrid" },
+        h("label", { class: "f wide", for: "e-name" }, "Name", name),
+        h("label", { class: "f" }, "Category", cat), h("label", { class: "f", for: "e-price" }, "Price (€)", price), h("label", { class: "f", for: "e-stock" }, "Stock", stock), h("label", { class: "f" }, "Status", stat),
+        h("label", { class: "f wide", for: "e-desc" }, "Description", desc),
+        h("div", { class: "wide row" }, prevBox, h("label", { class: "f" }, "Illustration", icon), h("div", { class: "f" }, "Colour", sw))),
+      err,
+      h("div", { class: "row" }, h("button", { class: "btn primary", type: "submit", text: "Save product" }), h("button", { class: "btn", type: "button", text: "Cancel", onclick: function () { UI.editing = null; UI.confirmDel = null; render(); } }), delBtn));
+  }
+  function aOrders() {
+    var counts = { All: S.orders.length }; STAT.forEach(function (s) { counts[s] = S.orders.filter(function (o) { return o.status === s; }).length; });
+    var chips = h("div", { class: "chips", style: "padding:0", role: "group", "aria-label": "Order status" }, ["All"].concat(STAT).map(function (s) {
+      return h("button", { type: "button", class: "chip", "aria-pressed": UI.ofilter === s ? "true" : "false", text: s + " (" + counts[s] + ")", onclick: function () { UI.ofilter = s; render(); } });
+    }));
+    var list = S.orders.filter(function (o) { return UI.ofilter === "All" || o.status === UI.ofilter; });
+    var rows = list.map(function (o) {
+      return h("tr", null, h("td", null, h("strong", { text: o.id }), h("div", { class: "muted", style: "font-size:.8rem", text: dfmt.format(o.date) })),
+        h("td", null, h("div", { text: o.name }), h("div", { class: "muted", style: "font-size:.8rem", text: o.email })),
+        h("td", { style: "min-width:200px" }, o.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")),
+        h("td", { class: "num", text: money(o.total) }),
+        h("td", null, sel(STAT, o.status, function (v) { o.status = v; save(); toast(o.id + " is now " + v + "."); render(); }, "Status of " + o.id)));
+    });
+    return h("div", { style: "display:grid;gap:20px" }, h("h1", { text: "Orders" }), chips,
+      h("section", { class: "panel" }, list.length ? h("div", { class: "tbox" }, h("table", null, h("thead", null, h("tr", null, h("th", { text: "Order" }), h("th", { text: "Customer" }), h("th", { text: "Items" }), h("th", { class: "num", text: "Total" }), h("th", { text: "Status" }))), h("tbody", null, rows))) : h("p", { class: "muted", text: "No orders with this status." })));
+  }
+  function aCustomers() {
+    var rows = S.customers.map(function (c) {
+      var mine = S.orders.filter(function (o) { return o.cid === c.id; });
+      return h("tr", null, h("td", null, h("strong", { text: c.name })), h("td", { text: c.email }), h("td", { text: dfmt.format(c.created) }), h("td", { class: "num", text: String(mine.length) }), h("td", { class: "num", text: money(mine.reduce(function (a, o) { return a + o.total; }, 0)) }));
+    });
+    return h("div", { style: "display:grid;gap:20px" }, h("h1", { text: "Customers" }),
+      h("section", { class: "panel" }, h("div", { class: "tbox" }, h("table", null, h("thead", null, h("tr", null, h("th", { text: "Name" }), h("th", { text: "Email" }), h("th", { text: "Joined" }), h("th", { class: "num", text: "Orders" }), h("th", { class: "num", text: "Spent" }))), h("tbody", null, rows)))));
+  }
+  function aSettings() {
+    var name = h("input", { class: "in", id: "s-name", value: S.shop.name });
+    var tag = h("textarea", { class: "in", id: "s-tag" }); tag.value = S.shop.tagline;
+    var rs = h("button", { class: "btn danger", type: "button", text: UI.resetArm ? "Click again to reset everything" : "Reset demo data", onclick: function () {
+      if (!UI.resetArm) { UI.resetArm = true; render(); return; }
+      S = seed(); UI.cart = []; UI.resetArm = false; setSession({ role: "admin" }); save(); toast("Demo data restored."); render();
+    } });
+    return h("div", { style: "display:grid;gap:20px" }, h("h1", { text: "Settings" }),
+      h("section", { class: "panel", style: "max-width:620px" }, h("h2", { text: "Shop details" }),
+        h("label", { class: "f", for: "s-name" }, "Shop name", name), h("label", { class: "f", for: "s-tag" }, "Tagline on the home page", tag),
+        h("button", { class: "btn primary", type: "button", style: "justify-self:start", text: "Save", onclick: function () { if (!name.value.trim()) return; S.shop.name = name.value.trim(); S.shop.tagline = tag.value.trim(); save(); toast("Saved."); render(); } })),
+      h("section", { class: "panel", style: "max-width:620px" }, h("h2", { text: "Demo data" }), h("p", { class: "muted", style: "margin:0", text: "Everything here is stored in this browser only. Reset brings back the example products, customers and orders." }), rs));
+  }
+
+  /* ---------- page ---------- */
+  function footer() {
+    return h("footer", { class: "foot gut" }, h("div", { class: "wrap" },
+      h("span", { text: S.shop.name + " is an example shop for a presentation. No real orders or payments." }),
+      h("button", { class: "link", type: "button", text: "Admin portal", onclick: function () { go("admin"); } })));
+  }
+  function render() {
+    app.textContent = "";
+    if (UI.view === "admin") app.append(adminView());
+    else {
+      app.append(topbar());
+      app.append(UI.view === "account" ? accountView() : shopView());
+      app.append(footer());
+      if (UI.view === "shop") fillGrid();
+    }
+    renderOverlay();
+  }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (UI.modal || UI.drawer || UI.checkout || UI.placed)) closeOv(); });
+  render();
+})();
+</script>
+</body>
+</html>
